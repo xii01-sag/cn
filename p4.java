@@ -1,98 +1,78 @@
+import java.util.Scanner;
 import java.io.*;
 
-class crc_gen {
-    static int[] divide(int[] divisor, int[] rem) {
-        int cur = 0;
-        while (true) {
-            while (cur < rem.length && rem[cur] == 0) {
-                cur++;
+public class CRC1 {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.print("Enter message bits: ");
+        String message = sc.nextLine();
+        System.out.print("Enter generator: ");
+        String generator = sc.nextLine();
+        
+        int[] data = new int[message.length() + generator.length() - 1];
+        int[] divisor = new int[generator.length()];
+        
+        for (int i = 0; i < message.length(); i++) {
+            data[i] = Integer.parseInt(message.charAt(i) + "");
+        }
+        for (int i = 0; i < generator.length(); i++) {
+            divisor[i] = Integer.parseInt(generator.charAt(i) + "");
+        }
+        
+        for (int i = 0; i < message.length(); i++) {
+            if (data[i] == 1) {
+                for (int j = 0; j < divisor.length; j++) {
+                    data[i + j] ^= divisor[j];
+                }
             }
-            if ((rem.length - cur) < divisor.length) {
+        }
+        
+        System.out.print("The checksum code is: ");
+        for (int i = 0; i < message.length(); i++) {
+            data[i] = Integer.parseInt(message.charAt(i) + "");
+        }
+        for (int i = 0; i < data.length; i++) {
+            System.out.print(data[i]);
+        }
+        System.out.println();
+        
+        System.out.print("Enter checksum code: ");
+        message = sc.nextLine();
+        System.out.print("Enter generator: ");
+        generator = sc.nextLine();
+        
+        data = new int[message.length() + generator.length() - 1];
+        divisor = new int[generator.length()];
+        
+        for (int i = 0; i < message.length(); i++) {
+            data[i] = Integer.parseInt(message.charAt(i) + "");
+        }
+        for (int i = 0; i < generator.length(); i++) {
+            divisor[i] = Integer.parseInt(generator.charAt(i) + "");
+        }
+        
+        for (int i = 0; i < message.length(); i++) {
+            if (data[i] == 1) {
+                for (int j = 0; j < divisor.length; j++) {
+                    data[i + j] ^= divisor[j];
+                }
+            }
+        }
+        
+        boolean valid = true;
+        for (int i = 0; i < data.length; i++) {
+            if (data[i] == 1) {
+                valid = false;
                 break;
             }
-            for (int i = 0; i < divisor.length; i++) {
-                rem[cur + i] = rem[cur + i] ^ divisor[i];
-            }
         }
-        return rem;
-    }
-
-    public static void main(String args[]) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int[] data;
-        int[] div;
-        int[] divisor;
-        int[] rem;
-        int[] crc;
-        int data_bits, divisor_bits, tot_length;
-
-        System.out.println("Enter number of data bits: ");
-        data_bits = Integer.parseInt(br.readLine());
-        data = new int[data_bits];
-
-        System.out.println("Enter data bits: ");
-        for (int i = 0; i < data_bits; i++) {
-            data[i] = Integer.parseInt(br.readLine());
+        
+        if (valid) {
+            System.out.println("Data stream is valid");
+        } else {
+            System.out.println("Data stream is invalid. CRC error occurred.");
         }
-
-        divisor_bits = 17;
-        divisor = new int[] {
-            1, 0, 0, 0, 1, 0, 0, 0, 0,
-            0, 1, 0, 0, 0, 0, 1
-        };
-
-        tot_length = data_bits + divisor_bits - 1;
-        div = new int[tot_length];
-        rem = new int[tot_length];
-        crc = new int[tot_length];
-
-        for (int i = 0; i < data_bits; i++) {
-            div[i] = data[i];
-        }
-
-        System.out.print("Dividend (after appending 0's) are: ");
-        for (int i = 0; i < div.length; i++) {
-            System.out.print(div[i]);
-        }
-        System.out.println();
-
-        for (int j = 0; j < div.length; j++) {
-            rem[j] = div[j];
-        }
-
-        rem = divide(divisor, rem);
-
-        for (int i = 0; i < div.length; i++) {
-            crc[i] = div[i] ^ rem[i];
-        }
-
-        System.out.println();
-        System.out.println("CRC code: ");
-        for (int i = 0; i < crc.length; i++) {
-            System.out.print(crc[i]);
-        }
-
-        System.out.println();
-        System.out.println("Enter CRC code of " + tot_length + " bits: ");
-
-        for (int i = 0; i < crc.length; i++) {
-            crc[i] = Integer.parseInt(br.readLine());
-        }
-
-        for (int j = 0; j < crc.length; j++) {
-            rem[j] = crc[j];
-        }
-
-        rem = divide(divisor, rem);
-
-        for (int i = 0; i < rem.length; i++) {
-            if (rem[i] != 0) {
-                System.out.println("Error");
-                break;
-            }
-            if (i == rem.length - 1) {
-                System.out.println("No Error");
-            }
-        }
+        sc.close();
     }
 }
