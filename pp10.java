@@ -1,71 +1,35 @@
-import java.io.*;
-import java.math.BigInteger;
-import java.util.Random;
+import java.util.Scanner;
 
-public class RSA {
-    private BigInteger p;
-    private BigInteger q;
-    private BigInteger N;
-    private BigInteger phi;
-    private BigInteger e;
-    private BigInteger d;
-    private int bitlength = 1024;
-    private Random r;
-
-    public RSA() {
-        r = new Random();
-        p = BigInteger.probablePrime(bitlength, r);
-        q = BigInteger.probablePrime(bitlength, r);
-        N = p.multiply(q);
-        phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
-        e = BigInteger.probablePrime(bitlength / 2, r);
-
-        while (phi.gcd(e).compareTo(BigInteger.ONE) > 0) {
-            e = e.add(BigInteger.ONE);
+class LeakyBucket {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.print("Enter bucket capacity: ");
+        int capacity = sc.nextInt();
+        System.out.print("Enter output rate: ");
+        int rate = sc.nextInt();
+        System.out.print("Enter number of packets: ");
+        int n = sc.nextInt();
+        
+        int bucket = 0;
+        
+        for (int i = 1; i <= n; i++) {
+            System.out.print("Enter packet size: ");
+            int packet = sc.nextInt();
+            
+            if (bucket + packet <= capacity) {
+                bucket += packet;
+                System.out.println("Packet accepted");
+            } else {
+                System.out.println("Packet dropped");
+            }
+            
+            int sent = Math.min(bucket, rate);
+            bucket -= sent;
+            
+            System.out.println("Packets sent: " + sent);
+            System.out.println("Packets remaining: " + bucket);
         }
-
-        d = e.modInverse(phi);
-    }
-
-    public RSA(BigInteger e, BigInteger d, BigInteger N) {
-        this.e = e;
-        this.d = d;
-        this.N = N;
-    }
-
-    public static void main(String[] args) throws IOException {
-        RSA rsa = new RSA();
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-
-        System.out.print("Enter the plain text: ");
-        String teststring = in.readLine();
-
-        System.out.println("Encrypting String: " + teststring);
-        System.out.println("String in Bytes: " + bytesToString(teststring.getBytes()));
-
-        byte[] encrypted = rsa.encrypt(teststring.getBytes());
-
-        System.out.println("Encrypted Bytes: " + bytesToString(encrypted));
-
-        byte[] decrypted = rsa.decrypt(encrypted);
-
-        System.out.println("Decrypting Bytes: " + bytesToString(decrypted));
-        System.out.println("Decrypted String: " + new String(decrypted));
-    }
-
-    private static String bytesToString(byte[] encrypted) {
-        String test = "";
-        for (byte b : encrypted) {
-            test += Byte.toString(b);
-        }
-        return test;
-    }
-
-    public byte[] encrypt(byte[] message) {
-        return new BigInteger(1, message).modPow(e, N).toByteArray();
-    }
-
-    public byte[] decrypt(byte[] message) {
-        return new BigInteger(1, message).modPow(d, N).toByteArray();
+        sc.close();
     }
 }
